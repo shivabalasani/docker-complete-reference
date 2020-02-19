@@ -74,3 +74,75 @@ Manual Image generation with Docker Commit : docker run -it alpine sh
 							In new terminal: docker ps (get the id of the running container above)
 											 docker commit -c 'CMD ["redis-server"]' fc60771eaa08
 											 docker run 083589332af ( runs the image created above)
+
+
+--------------------------------------------------------- Section 4 --------------------------------------------------------------------
+
+Go to simpleweb
+Build an image : docker build .
+
+COPY 	./ 			./  ->(Place to copy stuff to inside *the container*)
+		 |
+		 \/
+(Path to folder to copy from on *your machine* relative to build context)
+
+
+Build an image with tag : docker build -t sbalasani/simpleweb .
+
+Start the image : docker run sbalasani/simpleweb 
+http://localhost:8080 (Error)
+
+Docker run with Port Mapping : docker run -p 8080 : 8080 <image id>
+					(Route incoming request to this port on local host to  : this port inside the container)
+							   docker run -p 8080 : 8080 sbalasani/simpleweb
+
+http://localhost:8080
+
+Running shell inside the container : docker run -it sbalasani/simpleweb sh
+		 					or 	   : docker exec -it eeed31ee65c6 sh (Should go to /usr/app #)
+ls
+exit
+
+------------------------------------ Section 5 :  Docker Compose with Multiple Local Containers--------------------------------------------
+
+Go to visits
+Build an image : docker build .
+Build an image with tag : docker build -t sbalasani/visits:latest .
+Start the image : docker run sbalasani/visits 
+
+Running Redis on a seperate container : docker run redis
+Start the image : docker run sbalasani/visits 
+
+Options for connecting Node App Container with Redis Container
+1) Use Docker CLI's Networking Features
+2) Use Docker Compose
+
+Docker Compose 
+	1) Seperate CLI that get installed along with Docker.
+	2) Used to start up multiple Docker containers at the same time.
+	3) Automates some of the long-winded arguments we were passing to 'docker run'
+
+Docker Compose commands : docker-compose up   		(same as docker run myimage)
+						  docker-compose up --build (same as  docker build . and docker run myimage)	
+
+Stopping Docker Compose Containers : docker run -d redis	  (Lanunch single container)
+									 docker stop ba1220ea9edc (Stop single container)
+
+									 docker-compose up -d (Launch all containers in backgroud)
+									 docker-compose stop  (Stop all containers)
+
+Container Maintenance with Compose  
+Automatic Container Restarts :  restart: always (add this to the container you want to restart in docker-compose.yml)
+
+	Status Codes :  0 - We exited and everthing is OK
+				  1,2,3 etc - We exited because something went wrong!
+	
+	Restart Policies : "no" - Never attempt to restart this. container if it stops or crashes. Need to be in quotes in yml file
+						always - If this container stops *for any reason* always attempt to restart it.
+						on-failure - Only restart if the container stops with and error code.
+						unless-stoppped - Always restart unless we forcibly stop it.
+
+Container Status with Docker Compose : docker-compose ps (Prints out the statuses of the containers that are running)
+localhost:4001
+
+------------------------------------ Section 5 :  Docker Compose with Multiple Local Containers--------------------------------------------

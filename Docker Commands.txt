@@ -145,4 +145,68 @@ Automatic Container Restarts :  restart: always (add this to the container you w
 Container Status with Docker Compose : docker-compose ps (Prints out the statuses of the containers that are running)
 localhost:4001
 
------------------------------------- Section 5 :  Docker Compose with Multiple Local Containers--------------------------------------------
+------------------------------------ Section 6 :  Creating a Production-Grade Workflow--------------------------------------------
+Instead of this:
+npm install -g create-react-app
+create-react-app frontend
+
+Just do this:
+npx create-react-app frontend
+
+npm run start - Starts up a development server. For development use only
+npm run test - Runs tests associated with the project
+npm run build - Builds a production version of the application
+
+Build an image using Dev Dockerfile : docker build -f Dockerfile.dev .
+Duplicating dependencies : remove node_modules folder
+
+Starting the container : docker run ba1220ea9edc (Error)
+						 docker run -p 3000:3000 ba1220ea9edc
+
+Create-React-App has some issues detecting when files get changed on Windows based machines.  To fix this, please do the following:
+In the root project directory, create a file called .env
+Add the following text to the file and save it: CHOKIDAR_USEPOLLING=true
+
+Docker Volumes: set mapping from folder inside the container to the local folder so that changes are reflected immediately
+				
+				docker run -p 3000:3000 -v /app/node_modules -v $(pwd):/app <image_id>
+				puts a bookmark on the node_modules folder and maps the present working directory(pwd) into the /app folder.
+				use gitbash to run the above command.
+
+				If you are on Windows, the command needs a minor change:
+				docker run -p 3000:3000 -v /app/node_modules -v pwd:/app CONTAINER_ID
+
+				Windows 10 Pro w/ Docker Desktop students have noted this variation to work with GitBash:
+				docker run -p 3000:3000 -v /app/node_modules -v ${pwd}:/app CONTAINER_ID
+
+Shorthand with Docker Compose : Add docker-compose.yml 
+								docker-compose up
+
+								docker run ba1220ea9edc npm run test
+								docker run -it ba1220ea9edc npm run test
+
+Live updating tests			 :  Solution 1
+								docker-compose up
+								docker exec -t ba1220ea9edc npm run test
+
+								Solution 2
+								Update docker-compose.yml to include tests service
+								docker-compose up --build
+
+								docker attach ba1220ea9edc ( Attach terminal to the containers stdin/stdout/stderr)
+								docker exec -it ba1220ea9edc sh (Shell inside the container)
+								# ps
+
+Multi-Step Docker Builds : Create Dockerfile for production
+Running Nginx			 : docker build . 
+						   docker run -p 8080:80 ba1220ea9edc
+localhost:8080
+
+
+------------------------------------ Section 7 :  Continuous integration and deployment with AWS-------------------------------------------
+
+Create .travis.yml file and 
+	1) Tell Travis we need a copy of docker running.
+	2) Build our image using Dockerfile.dev.
+	3) Tell Travis how to run our test suite.
+	4) Tell Travis how to deploy our code to AWS.

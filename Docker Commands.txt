@@ -210,3 +210,9 @@ Create .travis.yml file and
 	2) Build our image using Dockerfile.dev.
 	3) Tell Travis how to run our test suite.
 	4) Tell Travis how to deploy our code to AWS.
+
+git checkout -b feature
+git add .
+git push origin feature
+
+Create and merge pull request from feature to master

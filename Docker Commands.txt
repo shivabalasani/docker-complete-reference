@@ -1,0 +1,76 @@
+------------------------------------------ Section 2 --------------------------------------------------------------------
+Docker Commands :-
+docker version
+docker run hello-world
+
+docker run busybox echo hi there
+docker run busybox ls
+docker run hello-world ls (error)
+
+List all running containers: docker ps
+docker run busybox ping google.com
+List all containers that we have ever created : docker ps --all 
+
+docker run = docker create + docker start
+
+Create a Container : docker create <image name>
+Start a Container : docker start <container id>
+
+docker create hello-world (will generate id of the container that is created)
+docker start -a 9271d.....21e (-a will watch for output from the container and prints it out on my terminal)
+
+Restarting Stopped Containers : docker start -a 37a8c45a23e1
+Removing Stopped Containers : docker system prune
+
+Retrieving Log Outputs : dock logs <container id>
+Stopping Containers : docker stop <container id> ( Terminate signal (SIGTERM) sent to running process and waits 10 seconds)
+					  docker kill <container id> ( Kill signal (SIGKILL) sent to running process to terminate immediately)
+					  
+
+Multi-Command Containers : docker run redis						   
+						   redis-server / redis-cli
+						   
+Executing Commands in Running Containers : docker exec -it <container id> <command>
+										   docker exec -it 37a8c45a23e1 redis-cli
+										   set myvalue 5 / get myvalue
+										   
+The purpose of the IT Flag : docker exec -it 37a8c45a23e1 redis-cli
+							 docker exec -i -t 37a8c45a23e1 redis-cli (-i ensures any stuff that I type gets directed to STDIN of the running process.-t makes all the text show up a little bit pretty)
+							 Every process in linux environment has STDIN/STDOUT/STDERR
+							 docker exec -i 37a8c45a23e1 redis-cli
+
+Getting a command prompt in a container : docker exec -it 37a8c45a23e1 sh ( Outputs #. Now can run any unix commands like cd /, ls. Ctrl + D or exit to exit)
+										  In MacOS it is bash
+										  In windows it is gitbash or powershell
+										  In Unix zsh(Z shell)   
+										  sh (shell)
+										  
+Starting with a shell : docker exec -it 37a8c45a23e1 sh
+						docker run -it busybox sh ( Outputs #)
+						
+Container Isolation : docker run -it busybox sh (touch hithere to creates a new file. Multiple instances of the shell won't have the hithere file. Two running containers will have seperate file systems and data won't be shared)
+										  
+								
+--------------------------------------------------------- Section 3 --------------------------------------------------------------------
+Dockerfile - Configuration to define how our container should behave. Dockerfile -> Docker Client -> Docker Server -> Usable Image!
+Creating a Dockerfile - Specify a base image -> Run some commands to install additional programs -> Specify a command to run on container startup.
+
+Building a Dockerfile : Create an image that runs redis-server
+						mkdir redis-image
+						cd redis-image
+												  (#User an existing docker image as a base / Download and install a dependency /  Tell the image what to do when it starts as a container)	
+						code .  Create Dockerfile (FROM alpine 								/RUN apk add --update redis 		/ CMD ["redis-server"])
+						docker build .
+						docker run fc60771eaa08
+						
+Writing a dockerfile  == Being given a computer with no OS and being told to install Chrome.
+
+Tagging an Image : docker build -t yourdockerid/RepoorProjectname:version .
+				   docker build -t sbalasani/redis:latest .
+				   docker run sbalasani/redis
+				   
+Manual Image generation with Docker Commit : docker run -it alpine sh
+											 # apk add --update redis (Modifying file system)
+							In new terminal: docker ps (get the id of the running container above)
+											 docker commit -c 'CMD ["redis-server"]' fc60771eaa08
+											 docker run 083589332af ( runs the image created above)

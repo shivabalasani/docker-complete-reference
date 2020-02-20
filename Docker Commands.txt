@@ -216,3 +216,27 @@ git add .
 git push origin feature
 
 Create and merge pull request from feature to master
+
+------------------------------------ Section 8 :  Building a Multi-Container Application -------------------------------------------
+
+------------------------------------ Section 9 :  Dockerizing Multiple Services ----------------------------------------------------
+Go to complex
+cd client
+Build an image using Dev Dockerfile:  docker build -f Dockerfile.dev .
+Run the container : 				  docker run ba1220ea9edc
+
+cd server
+Build an image using Dev Dockerfile:  docker build -f Dockerfile.dev .
+Run the container : 				  docker run ba1220ea9edc
+
+cd worker
+Build an image using Dev Dockerfile:  docker build -f Dockerfile.dev .
+Run the container : 				  docker run ba1220ea9edc
+
+Go to complex-elastic-beanstalk
+docker-compose up --build
+
+------------------------------------ Section 10 :  Continuous Integration Workflow for Multiple Images -------------------------------
+Add .travis.yml file to push images to docker hub
+
+------------------------------------ Section 11 :  Multi-Container Deployments to AWS -------------------------------

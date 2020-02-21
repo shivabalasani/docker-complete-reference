@@ -132,12 +132,12 @@ Stopping Docker Compose Containers : docker run -d redis	  (Lanunch single conta
 									 docker-compose stop  (Stop all containers)
 
 Container Maintenance with Compose  
-Automatic Container Restarts :  restart: always (add this to the container you want to restart in docker-compose.yml)
+Automatic Container Restarts :  restart: always (add this to the container you want to restart in docker-compose.yaml)
 
 	Status Codes :  0 - We exited and everthing is OK
 				  1,2,3 etc - We exited because something went wrong!
 	
-	Restart Policies : "no" - Never attempt to restart this. container if it stops or crashes. Need to be in quotes in yml file
+	Restart Policies : "no" - Never attempt to restart this. container if it stops or crashes. Need to be in quotes in yaml file
 						always - If this container stops *for any reason* always attempt to restart it.
 						on-failure - Only restart if the container stops with and error code.
 						unless-stoppped - Always restart unless we forcibly stop it.
@@ -179,7 +179,7 @@ Docker Volumes: set mapping from folder inside the container to the local folder
 				Windows 10 Pro w/ Docker Desktop students have noted this variation to work with GitBash:
 				docker run -p 3000:3000 -v /app/node_modules -v ${pwd}:/app CONTAINER_ID
 
-Shorthand with Docker Compose : Add docker-compose.yml 
+Shorthand with Docker Compose : Add docker-compose.yaml 
 								docker-compose up
 
 								docker run ba1220ea9edc npm run test
@@ -190,7 +190,7 @@ Live updating tests			 :  Solution 1
 								docker exec -t ba1220ea9edc npm run test
 
 								Solution 2
-								Update docker-compose.yml to include tests service
+								Update docker-compose.yaml to include tests service
 								docker-compose up --build
 
 								docker attach ba1220ea9edc ( Attach terminal to the containers stdin/stdout/stderr)
@@ -205,7 +205,7 @@ localhost:8080
 
 ------------------------------------ Section 7 :  Continuous integration and deployment with AWS-------------------------------------------
 
-Create .travis.yml file and 
+Create .travis.yaml file and 
 	1) Tell Travis we need a copy of docker running.
 	2) Build our image using Dockerfile.dev.
 	3) Tell Travis how to run our test suite.
@@ -237,6 +237,192 @@ Go to complex-elastic-beanstalk
 docker-compose up --build
 
 ------------------------------------ Section 10 :  Continuous Integration Workflow for Multiple Images -------------------------------
-Add .travis.yml file to push images to docker hub
+Add .travis.yaml file to push images to docker hub
 
------------------------------------- Section 11 :  Multi-Container Deployments to AWS -------------------------------
+------------------------------------ Section 11 :  Multi-Container Deployments to AWS ------------------------------------------------
+
+------------------------------------ Section 12 :  Kubernetes ------------------------------------------------------------------------
+
+Development - minikube
+Production(Managed Solutions ) - Amazon Elastic Containe Service for Kubernetes (EKS)
+							   - Google Cloud Kubernetes Engine (GKE)
+
+minikube - Use for managing the VM itself
+kubectl - Use for managing containers in the node
+
+Local Kubernetes Development : Intall kubectl	- cli for interacting with our master
+							   Install a VM driver virtualbox - used to make a VM that will be your single node
+							   Install minikube - Runs a single node on that VM
+
+kubectl version
+minikube status
+kubectl cluster-info
+
+
+Docker Compose 															Kubernetes
+Each entry can optionally get docker-compose to build an image 			Kubernetes expects all images to already be built
+Each entry represents a conainter we want to create						One config file per object we want to create
+Each entry defines the Networking requirements (ports)				 	We have to manually set up all networking
+
+
+Get a simple conainter running on our local Kubernetes Cluster running
+Make sure our image is hosted on docker hub
+Make on config file to create the container
+Make one config file to setup networking
+
+Pods - Runs one or more closely related containers
+Services - Sets up networking in a Kubernetes Cluster
+		 - ClusterIP, Nodeport, LoadBalancer, Ingress
+		 - NodePort Exposes a container to the outside world (only good for dev purposes)
+
+go to simplek8s
+kubectl apply -f <filename>
+
+kubectl apply -f client-pod.yaml
+kubectl apply -f client-node-port.yaml
+
+Print the status of all running ports : kubectl get pods
+										kubectl get services
+
+minikube ip
+http://192.168.99.100:31515
+
+
+Kubernetes is a system to deploy containerized apps.
+Nodes are individual machines (or vm's) that run containers.
+Masters are machines (or vm's) with a set of programs to manage nodes.
+Kubernetes didn't build our images - it got them from somewhere else.
+Kubernetes (the master) decided where to run each container - each nodecan run a dissimilar set of containers.
+To deploy something, we update the desired state of the master with a config file.
+The master works constantly to meet your desired state.
+
+------------------------------------------ Section 13 :  Maintaining sets of containers with deployments ---------------------------------------
+
+Imperative approach :
+Run a command to list out current running pods.
+Run a command to update the current pod to use a new image.
+
+Declarative approach:
+Update our config file that originally created the pod.
+Throw the updated config file into kubectl
+
+
+go to simplek8s update client-pod.yaml image to multi-worker
+kubectl apply -f client-pod.yaml
+
+Get detailed info about an object : kubectl describe <object type> <object name>
+									kubectl describe pod client-pod
+
+update containerPort to 9999
+kubectl apply -f client-pod.yaml //Error: Pod updates may not change fields other than image.
+
+
+Object Types
+Pods - Runs one or more closely related containers
+Services - Sets up networking in a Kubernetes Cluster
+Deployment - Maintains a set of identical pods, ensuring that they have the correct config and that the right number exists
+
+Pods : Runs a single set of containers
+	   Good for one-off dev purposes
+	   Rarely used directly in production
+
+Deployment :  Runs a set of identical pods (one or more)
+			  Monitors the state of each pod, updating as necessary
+			  Good for dev
+			  Good for production
+
+Create client-deployment.yaml
+Remove an Object : kubectl delete -f <config file>
+				   kubectl delete -f client-pod.yaml
+
+kubectl get pods
+kubectl apply -f client-deployment.yaml 
+kubectl get deployments
+
+minikube ip
+http://192.168.99.100:31515
+
+kubectl get pods -o wide
+kubectl describe pods
+
+Update Image Version : Change deployment to use multi-client again
+					   Update the multi-client image
+					   Tag the image with a version number, push to docker hub
+					   Run a 'kubectl' command forcing the deployment to use the new image version
+
+Change App.js in multi-client image.
+docker build -t sbalasani/multi-client .
+docker push sbalasani/multi-client
+kubectl apply -f client-deployment.yaml (File is unchanged)
+
+Manually delete pods to get the deployment to recreate them with the latest version - Deleting pods manually seems silly
+Tag built images with a real version number and specify that version in the config file  - Adds an extra step in the production deployment process
+Use an imperative command to update the image version the deployment should use - Uses an imperative command
+
+cd complex
+cd client
+docker build -t sbalasani/multi-client:v5 .
+docker push sbalasani/multi-client:v5 ( push updated version to docker hub)
+
+cd simplek8s
+kubectl set image <object_type> / <object_name> <container_name> = <new image to use>
+kubectl set image deployment/client-deployment client=sbalasani/multi-client:v5
+
+kubectl get pods
+minikube ip
+http://192.168.99.100:31515
+
+Reconfiguring Docker CLI:
+docker ps
+Configure the VM to Use Your Docker Server : eval $(minikube docker-env)
+minikube docker-env
+docker ps
+
+This only configures your current terminal window.You can look up how to run a command in your terminal every time you open a window to fix this.
+
+
+------------------------------------------ Section 14 :  A Multi-Container App with Kubernetes -----------------------------------------------------
+cd complex
+docker-compose up --build
+
+Object Types
+Pods - Runs one or more closely related containers
+Services - Sets up networking in a Kubernetes Cluster
+		 - ClusterIP : Exposes a set of pods to other objects in the cluster
+		 - NodePort : Exposes a set of pods to the outside world (only good for dev purposes!!!)
+		 - LoadBalancer
+		 - Ingress
+
+kubectl get deployments
+kubectl delete deployment client-deployment
+kubectl get services
+kubectl delete service client-node-port
+
+Add client-deployment.yaml
+Add client-cluster-ip-service.yaml
+Add server-deployment.yaml
+Add server-cluster-ip-service.yaml
+Add worker-deployment.yaml
+Add redis-deployment.yaml
+Add redis-cluster-ip-service.yaml
+Add postgres-deployment.yaml
+Add postgres-cluster-ip-service.yaml
+
+kubectl apply -f k8s
+kubectl get pods
+kubectl get deployments
+kubectl get services
+
+"Volume" in generic container terminology : Some type of mechanism that allows a container to access a filesystem outside itself
+"Volume" in Kubernetes : An object that allows a container to store data at the pod level
+
+Access Modes
+	ReadWriteOnce - Can be used by a single node.
+	ReadOnlyMany - Multiple nodes can read from this.
+	ReadWriteMany - Can be read and written to by many nodes
+
+kubectl get storageclass
+kubectl describe storageclass
+
+kubectl get pv
+kubectl get pvc (persistent volume claims)

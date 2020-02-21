@@ -426,3 +426,8 @@ kubectl describe storageclass
 
 kubectl get pv
 kubectl get pvc (persistent volume claims)
+
+Creating a secret : kubectl create secret generic <secret_name> --from-literal key=value
+					kubectl create secret generic pgpassword --from-literal PGPASSWORD=1234asdf
+
+kubectl get secrets

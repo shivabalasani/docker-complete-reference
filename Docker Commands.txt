@@ -431,3 +431,108 @@ Creating a secret : kubectl create secret generic <secret_name> --from-literal k
 					kubectl create secret generic pgpassword --from-literal PGPASSWORD=1234asdf
 
 kubectl get secrets
+
+------------------------------------------ Section 15 :  Handling Traffic with Ingress Controllers -----------------------------------------------------
+
+Ingress - Exposes a set of services to the outside world
+go to complex
+
+https://kubernetes.github.io/ingress-nginx/deploy/
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/mandatory.yaml
+minikube addons enable ingress
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/cloud-generic.yaml
+
+https://192.168.99.100
+
+minikube dashboard
+
+------------------------------------------ Section 16 :  Kubernetes Production Deployment -----------------------------------------------------
+Create muli-k8s git hub repository
+Create local repo . go to complex
+git remote -v 
+git remote remove origin
+git remote add origin
+
+Create google cloued project :  console.cloud.google.com
+Create Kubernetes Cluster in google cloud.
+
+Travis Config File
+	- Install Google Cloud SDK CLI
+	- Configure the SDK with out Google Cloud auth info
+	- Login to Docker CLI
+	- Build the 'test' version of multi-client
+	- Run tests
+	- If tests are successful, run a script to deploy newest images
+	- Build all our images, tag each one, push each to docker hub
+	- Apply all configs in the 'k8s' folder
+	- Imperatively set latest images on each deployment
+
+Create a Service Account
+Download service account credentials in a json file
+Download and install the Travis CLI
+Encrypt and upload the json file to our Travis account
+In travis.yml, add code to unencrypt the json file and load it into GCloud SDK
+
+go to complex
+Download and install the Travis CLI : docker run -it -v $(pwd):/app ruby:2.3 sh
+									  cd app
+									  # gem install travis --no-rdoc --no-ri
+									  # gem install travis
+									  # travis login
+									  Copy json file into the 'volumed' directory so we can use it in the container
+									  travis encrypt-file service-account.json -r shivabalasani/multi-k8s
+
+git rev-parse HEAD
+git log
+
+kubectl create secret generic pgpassword --from-literal PGPASSWORD=mypgpassword123 
+
+https://github.com/helm/helm
+https://helm.sh/docs/intro/quickstart/
+
+In google cloud cli
+$ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+$ chmod 700 get_helm.sh
+$ ./get_helm.sh
+
+Role Based Access Control (RBAC)
+		- Limits who can access and modify objects in our cluster
+		- Enabled on Google Cloud by default
+		- Tiller wants to make changes to our cluster, so it needs to get some permissions set
+
+kubectl get namespaces
+
+Assigning Tiller a Service Account
+  kubectl create serviceaccount --namespace kube-system tiller 
+  		- Create a new service account called tiller in the kube-system namespace
+  kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+		-Create a new clusterrolebinding with the role 'cluster-admin' and assign it to service account 'tiller'
+
+ helm init --service-account tiller --upgrade
+ helm install my-nginx stable/nginx-ingress --set rbac.create=true
+
+ ------------------------------------------ Section 17 :  HTTPS Setup with Kubernetes -----------------------------------------------------
+
+ Purchase domain : domains.google.com
+ github.com/jetstack/cert-manager
+ helm install \
+	--name cert-manager \
+	--namespace kube-system \
+	stable/cert-manager
+
+create issuer.yaml
+create certificate.yaml
+
+git checkout master
+
+kubectl get certificates
+kubectl describe certificates
+kubectl get secrets
+
+ ------------------------------------------ Section 18 : Local Development with skaffold -----------------------------------------------------
+
+ brew install skaffold
+ skaffold version
+
+ create skaffold.yaml in complex
+ skaffold dev

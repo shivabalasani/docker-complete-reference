@@ -1,0 +1,31 @@
+docker ps -a                        //Display all images including exited 
+docker run -p 27017:27017 -d mongo  //Start mongo image on port 27017 in the background
+docker run -p 27017:27017 -v /temp:/data/db -d mongo 
+
+docker images -q --no-trunc         //To get the full SHA256 hash value of images
+docker images
+
+The format of full tag name is : [REGISTRYHOST/][USERNAME/]NAME[:TAG]
+Full tag example: registry.hub.docker.com/mongo:latest
+
+docker stop containerid
+docker logs -f containerid
+
+RabbitMQ
+docker run -d --hostname guru-rabbit --name some-rabbit -p 8080:15672 -p 5671:5671 -p 5672:5672 rabbitmq:3-management
+
+MySQL
+docker run --name guru-mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -v -/temp:/var/lib/mysql -p 3306:3306 -d mysql
+
+Docker House Keeping
+Kill all Running Docker Containers : docker kill $(docker ps -q)
+Delete all Stopped Docker Containers : docker rm $(docker ps -a -q)
+Remove a Docker Image : docker rmi <image name>
+Delete Untagged(dangling) Images : docker rmi $(docker images -q -f dangling=true)
+Delete All Images : docker rmi $(docker images -q)
+Remove all dangling volumes : docker volume rm $(docker volume ls -f dangling=true -q)
+
+
+docker run -d centos tail -f dev/null
+docker exec -it elastic_mendeleev bash
+yum install java
